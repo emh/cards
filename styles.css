@@ -1,0 +1,80 @@
+body, html, #app {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+}
+
+#board {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+}
+
+#board .row {
+    display: flex;
+    gap: 5px;
+}
+
+#pile {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+}
+
+.card, .slot, .deck {
+    width: 35px;
+    height: 50px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.card {
+    background-color: white;
+    border: solid 1px black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.slot {
+    background-color: transparent;
+    border: dotted 1px grey;
+}
+
+.slot:hover {
+    border-color: black;
+}
+
+.deck {
+    background-color: royalblue;
+    border: solid 1px black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.deck.visible {
+    background-color: white;
+}
+
+.hearts, .diamonds {
+    color: red;
+}
+
+.number {
+    font-size: 32px;
+}
+
+.score {
+    text-align: right;
+}
