@@ -124,9 +124,11 @@ const flush = (hand) => hand.every((card) => card.suit === hand[0].suit);
 const straight = (hand) => {
     const sorted = sort(hand);
 
-    if (sorted[4].value - sorted[0].value === 4) return true;
+    for (let i = 1; i < sorted.length; i++) {
+        if (sorted[i].value - sorted[i - 1].value > 1) return false;
+    }
 
-    return false;
+    return true;
 }
 const royalFlush = (hand) => {
     if (!flush(hand)) return false;
