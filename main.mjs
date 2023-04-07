@@ -1,38 +1,6 @@
-const parse = (s) => {
-    const [prefix, ...classes] = s.split('.');
-    const [name, id] = prefix.split('#');
-
-    return { name, id, classes };
-};
-const create = (s) => {
-    const { name, id, classes } = parse(s);
-    const el = document.createElement(name);
-
-    if (id) el.id = id;
-    classes.forEach((c) => el.classList.add(c));
-
-    return el;
-};
-const get = (id) => document.getElementById(id);
-const clear = (el) => el.innerHTML = '';
-
-const range = (m, n) => [...Array(n + 1).keys()].slice(m);
-const shuffle = (a) => [...a].sort(() => Math.random() - 0.5);
-const div = (n, d) => ({ q: Math.floor(n / d), r: n % d });
-
-const SPADES = '♠';
-const CLUBS = '♣';
-const HEARTS = '♥';
-const DIAMONDS = '♦';
-
-const suits = [SPADES, CLUBS, HEARTS, DIAMONDS];
-
-const ACE = 1;
-const JACK = 11;
-const QUEEN = 12;
-const KING = 13;
-
-const deck = suits.map((s) => range(ACE, KING).map((v) => ({ suit: s, value: v }))).flat();
+import { create, get, clear } from './html.mjs';
+import { div, shuffle } from './utils.mjs';
+import { deck, SPADES, CLUBS, HEARTS, DIAMONDS, royalFlush, straight, flush, fourOfAKind, fullHouse, threeOfAKind, twoPairs, onePair, ACE, JACK, QUEEN, KING } from './cards.mjs';
 
 const state = {
     board: [
@@ -122,72 +90,6 @@ function renderPile() {
     pile.append(deck);
 }
 
-const sort = (hand) => [...hand].sort((c1, c2) => c1.value - c2.value);
-const aKind = (cards) => cards.every((card) => card.value === cards[0].value);
-const flush = (hand) => hand.every((card) => card.suit === hand[0].suit);
-const straight = (hand) => {
-    const sorted = sort(hand);
-
-    for (let i = 1; i < sorted.length; i++) {
-        if (sorted[i].value - sorted[i - 1].value > 1) return false;
-    }
-
-    return true;
-}
-const royalFlush = (hand) => {
-    if (!flush(hand)) return false;
-
-    const sorted = sort(hand);
-
-    if (sorted[0].value === ACE && sorted[4].value === KING && sorted[4].value - sorted[1].value === 3) return true;
-
-    return false;
-};
-const fourOfAKind = (hand) => {
-    const sorted = sort(hand);
-
-    if (aKind(sorted.slice(0, 4))) return true;
-    if (aKind(sorted.slice(1, 5))) return true;
-
-    return false;
-};
-const fullHouse = (hand) => {
-    const sorted = sort(hand);
-
-    if (aKind(sorted.slice(0, 2)) && aKind(sorted.slice(2, 5))) return true;
-    if (aKind(sorted.slice(0, 3)) && aKind(sorted.slice(3, 5))) return true;
-
-    return false;
-};
-const threeOfAKind = (hand) => {
-    const sorted = sort(hand);
-
-    if (aKind(sorted.slice(0, 3))) return true;
-    if (aKind(sorted.slice(1, 4))) return true;
-    if (aKind(sorted.slice(2, 5))) return true;
-
-    return false;
-};
-const twoPairs = (hand) => {
-    const sorted = sort(hand);
-
-    if (aKind(sorted.slice(0, 2)) && aKind(sorted.slice(2, 4))) return true;
-    if (aKind(sorted.slice(0, 2)) && aKind(sorted.slice(3, 5))) return true;
-    if (aKind(sorted.slice(1, 3)) && aKind(sorted.slice(3, 5))) return true;
-
-    return false;
-};
-const onePair = (hand) => {
-    const sorted = sort(hand);
-
-    if (aKind(sorted.slice(0, 2))) return true;
-    if (aKind(sorted.slice(1, 3))) return true;
-    if (aKind(sorted.slice(2, 4))) return true;
-    if (aKind(sorted.slice(3, 5))) return true;
-
-    return false;
-}
-
 function calcScore(hand) {
     if (royalFlush(hand)) {
         return { name: 'Royal Flush', points: 100 };
@@ -250,8 +152,6 @@ function renderScore() {
     const score = create('div.score');
     const scores = calcScores();
 
-    console.log(scores);
-
     const lines = scores
         .filter((s) => s !== null)
         .map((s) => s === null ? '<p>nothing: 000</p>' : `<p>${s.name}: ${String(s.points).padStart(3, '0')}</p>`);
@@ -266,7 +166,7 @@ function renderScore() {
 function render() {
     renderBoard();
 
-    if (state.pile.length > 0) {
+    if (state.pile.length > 0 || state.dealtCard) {
         renderPile();
     } else {
         renderScore();
@@ -284,7 +184,7 @@ render();
 
 //     render();
 
-//     if (state.pile.length > 0) {
+//     if (n < 23) {
 //         setTimeout(autoPlay, 250);
 //     }
 // }
