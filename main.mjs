@@ -73,7 +73,7 @@ function renderBoard() {
                         state.topCardVisible = false;
                     }
 
-                    if (state.pile.length === 0) state.dealtCard = null;
+                    if (!state.autoDeal && state.pile.length === 0) state.dealtCard = null;
 
                     render();
                 });
