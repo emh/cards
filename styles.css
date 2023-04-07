@@ -34,9 +34,11 @@ body, html, #app {
 
 #pile {
     display: flex;
+    flex-direction: column;
     flex: 1;
     justify-content: center;
     align-items: center;
+    gap: 16px;
 }
 
 .card, .slot, .deck {

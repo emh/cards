@@ -15,7 +15,8 @@ const state = {
         [null, null, null, null, null]
     ],
     pile: shuffle(deck, random).slice(0, 25),
-    topCardVisible: false
+    topCardVisible: false,
+    autoDeal: false
 };
 
 const suitClasses = {
@@ -33,6 +34,11 @@ const cardValue = (v) => {
         case KING: return 'K';
         default: return v;
     }
+}
+
+function dealCard() {
+    state.dealtCard = state.pile[0];
+    state.pile.shift();
 }
 
 function renderBoard() {
@@ -59,8 +65,13 @@ function renderBoard() {
                     }
 
                     state.board[i][j] = state.dealtCard;
-                    state.placement = { i, j };
-                    state.topCardVisible = false;
+
+                    if (state.autoDeal) {
+                        dealCard();
+                    } else {
+                        state.placement = { i, j };
+                        state.topCardVisible = false;
+                    }
 
                     if (state.pile.length === 0) state.dealtCard = null;
 
@@ -73,6 +84,25 @@ function renderBoard() {
 
         board.append(row);
     }
+}
+
+function renderAutoDeal() {
+    const div = create('div.autodeal');
+
+    const checkbox = create('input#autodeal');
+    checkbox.setAttribute('type', 'checkbox');
+    if (state.autoDeal) checkbox.setAttribute('checked', true);
+    checkbox.addEventListener('change', () => {
+        state.autoDeal = !state.autoDeal;
+        render();
+    });
+    const label = create('label');
+    label.setAttribute('for', 'autodeal');
+    label.innerHTML = 'Autodeal';
+
+    div.append(checkbox, label);
+
+    return div;
 }
 
 function renderPile() {
@@ -88,14 +118,13 @@ function renderPile() {
     } else {
         deck.addEventListener('click', () => {
             state.topCardVisible = true;
-            state.dealtCard = state.pile[0];
-            state.pile.shift();
+            dealCard();
             state.placement = null;
             render();
         });
     }
 
-    pile.append(deck);
+    pile.append(deck, renderAutoDeal());
 }
 
 function calcScore(hand) {
@@ -172,7 +201,6 @@ function renderScore() {
 }
 
 function render() {
-    console.log(state);
     renderBoard();
 
     if (state.pile.length > 0 || state.dealtCard) {
