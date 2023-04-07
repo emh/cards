@@ -254,6 +254,7 @@ const emojiHand = ({ name, suit }) => {
 function generateShare(scores) {
     const share = [
         'Poker Squares by @emh',
+        key(),
         scores.filter((s) => s !== null).map(emojiHand).join(''),
         `Score: ${totalScore(scores)}`,
         'https://emh.io/pokersquares'
