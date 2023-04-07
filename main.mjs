@@ -59,24 +59,26 @@ function renderBoard() {
             } else {
                 slot.classList.add('slot');
 
-                slot.addEventListener('click', () => {
-                    if (state.placement) {
-                        state.board[state.placement.i][state.placement.j] = null;
-                    }
+                if (state.dealtCard) {
+                    slot.addEventListener('click', () => {
+                        if (state.placement) {
+                            state.board[state.placement.i][state.placement.j] = null;
+                        }
 
-                    state.board[i][j] = state.dealtCard;
+                        state.board[i][j] = state.dealtCard;
 
-                    if (state.autoDeal) {
-                        dealCard();
-                    } else {
-                        state.placement = { i, j };
-                        state.topCardVisible = false;
-                    }
+                        if (state.autoDeal) {
+                            dealCard();
+                        } else {
+                            state.placement = { i, j };
+                            state.topCardVisible = false;
+                        }
 
-                    if (!state.autoDeal && state.pile.length === 0) state.dealtCard = null;
+                        if (!state.autoDeal && state.pile.length === 0) state.dealtCard = null;
 
-                    render();
-                });
+                        render();
+                    });
+                }
             }
 
             row.append(slot);

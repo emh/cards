@@ -8,6 +8,7 @@ body, html, #app {
 #app {
     display: flex;
     flex-direction: column;
+    user-select: none;
 }
 
 #header {
