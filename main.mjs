@@ -2,22 +2,59 @@ import { create, get, clear } from './html.mjs';
 import { shuffle, key } from './utils.mjs';
 import { deck, SPADES, CLUBS, HEARTS, DIAMONDS, royalFlush, straight, flush, fourOfAKind, fullHouse, threeOfAKind, twoPairs, onePair, ACE, JACK, QUEEN, KING } from './cards.mjs';
 import { prng } from './prng.mjs';
+import { getHistory, putHistory } from './history.mjs';
+
+const GAME = 'poker-squares';
 
 const seed = Date.parse(key());
 const random = prng(seed);
 
-const state = {
-    board: [
-        [null, null, null, null, null],
-        [null, null, null, null, null],
-        [null, null, null, null, null],
-        [null, null, null, null, null],
-        [null, null, null, null, null]
-    ],
-    pile: shuffle(deck, random).slice(0, 25),
-    topCardVisible: false,
-    autoDeal: false
+function loadGame() {
+    const history = getHistory(GAME);
+
+    return history[key()];
+}
+
+function saveGame(game) {
+    const history = getHistory(GAME);
+
+    history[key()] = game;
+
+    putHistory(GAME, history);
+}
+
+function getAutoDeal() {
+    const history = getHistory(GAME);
+    const keys = Object.keys(history);
+
+    const lastKey = keys.sort().pop();
+
+    console.log(lastKey);
+
+    return lastKey ? history[lastKey].autoDeal : false;
+}
+
+function initialize() {
+    const savedGame = loadGame();
+
+    if (savedGame) return savedGame;
+
+    return {
+        key: key(),
+        board: [
+            [null, null, null, null, null],
+            [null, null, null, null, null],
+            [null, null, null, null, null],
+            [null, null, null, null, null],
+            [null, null, null, null, null]
+        ],
+        pile: shuffle(deck, random).slice(0, 25),
+        topCardVisible: false,
+        autoDeal: getAutoDeal()
+    };
 };
+
+const state = initialize();
 
 const suitClasses = {
     [SPADES]: 'spades',
@@ -203,7 +240,10 @@ function renderScore() {
 }
 
 function render() {
+    saveGame(state);
     renderBoard();
+
+    console.log(state);
 
     if (state.pile.length > 0 || state.dealtCard) {
         renderPile();
