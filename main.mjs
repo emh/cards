@@ -81,14 +81,15 @@ function renderBoard() {
             } else {
                 slot.classList.add('slot');
 
-                if (state.topCardVisible) {
-                    slot.addEventListener('click', () => {
-                        state.board[i][j] = state.pile[0];
-                        state.pile.shift();
-                        state.topCardVisible = false;
-                        render();
-                    });
-                }
+                slot.addEventListener('click', () => {
+                    if (state.placement) {
+                        state.board[state.placement.i][state.placement.j] = null;
+                    }
+                    state.board[i][j] = state.dealtCard;
+                    state.placement = { i, j };
+                    state.topCardVisible = false;
+                    render();
+                });
             }
 
             row.append(slot);
@@ -106,11 +107,14 @@ function renderPile() {
     const deck = create('div.deck');
 
     if (state.topCardVisible) {
-        deck.classList.add('visible', suitClasses[state.pile[0].suit]);
-        deck.innerHTML = `${cardValue(state.pile[0].value)}${state.pile[0].suit}`;
+        deck.classList.add('visible', suitClasses[state.dealtCard.suit]);
+        deck.innerHTML = `${cardValue(state.dealtCard.value)}${state.dealtCard.suit}`;
     } else {
         deck.addEventListener('click', () => {
             state.topCardVisible = true;
+            state.dealtCard = state.pile[0];
+            state.pile.shift();
+            state.placement = null;
             render();
         });
     }
