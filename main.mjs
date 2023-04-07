@@ -1,5 +1,5 @@
 import { create, get, clear } from './html.mjs';
-import { div, shuffle } from './utils.mjs';
+import { shuffle } from './utils.mjs';
 import { deck, SPADES, CLUBS, HEARTS, DIAMONDS, royalFlush, straight, flush, fourOfAKind, fullHouse, threeOfAKind, twoPairs, onePair, ACE, JACK, QUEEN, KING } from './cards.mjs';
 
 const state = {
@@ -53,9 +53,13 @@ function renderBoard() {
                     if (state.placement) {
                         state.board[state.placement.i][state.placement.j] = null;
                     }
+
                     state.board[i][j] = state.dealtCard;
                     state.placement = { i, j };
                     state.topCardVisible = false;
+
+                    if (state.pile.length === 0) state.dealtCard = null;
+
                     render();
                 });
             }
@@ -164,6 +168,7 @@ function renderScore() {
 }
 
 function render() {
+    console.log(state);
     renderBoard();
 
     if (state.pile.length > 0 || state.dealtCard) {
@@ -184,7 +189,7 @@ render();
 
 //     render();
 
-//     if (n < 23) {
+//     if (n < 22) {
 //         setTimeout(autoPlay, 250);
 //     }
 // }
