@@ -1,6 +1,10 @@
 import { create, get, clear } from './html.mjs';
-import { shuffle } from './utils.mjs';
+import { shuffle, key } from './utils.mjs';
 import { deck, SPADES, CLUBS, HEARTS, DIAMONDS, royalFlush, straight, flush, fourOfAKind, fullHouse, threeOfAKind, twoPairs, onePair, ACE, JACK, QUEEN, KING } from './cards.mjs';
+import { prng } from './prng.mjs';
+
+const seed = Date.parse(key());
+const random = prng(seed);
 
 const state = {
     board: [
@@ -10,7 +14,7 @@ const state = {
         [null, null, null, null, null],
         [null, null, null, null, null]
     ],
-    pile: shuffle(deck).slice(0, 25),
+    pile: shuffle(deck, random).slice(0, 25),
     topCardVisible: false
 };
 
