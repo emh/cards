@@ -1,9 +1,9 @@
 import { range } from './utils.mjs';
 
-export const SPADES = '♠';
-export const CLUBS = '♣';
-export const HEARTS = '♥';
-export const DIAMONDS = '♦';
+export const SPADES = '♠️';
+export const CLUBS = '♣️';
+export const HEARTS = '♥️';
+export const DIAMONDS = '♦️';
 
 export const suits = [SPADES, CLUBS, HEARTS, DIAMONDS];
 

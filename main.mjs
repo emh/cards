@@ -1,4 +1,4 @@
-import { create, get, clear } from './html.mjs';
+import { create, get, clear, button } from './html.mjs';
 import { shuffle, key } from './utils.mjs';
 import { deck, SPADES, CLUBS, HEARTS, DIAMONDS, royalFlush, straight, flush, fourOfAKind, fullHouse, threeOfAKind, twoPairs, onePair, ACE, JACK, QUEEN, KING } from './cards.mjs';
 import { prng } from './prng.mjs';
@@ -172,7 +172,7 @@ function calcScore(hand) {
     }
 
     if (straight(hand) && flush(hand)) {
-        return { name: 'Straight Flush', points: 75 };
+        return { name: 'Straight Flush', points: 75, suit: hand[0].suit };
     }
 
     if (fourOfAKind(hand)) {
@@ -184,7 +184,7 @@ function calcScore(hand) {
     }
 
     if (flush(hand)) {
-        return { name: 'Flush', points: 20 };
+        return { name: 'Flush', points: 20, suit: hand[0].suit };
     }
 
     if (straight(hand)) {
@@ -220,23 +220,98 @@ function calcScores() {
     return hands;
 }
 
-function renderScore() {
-    const pile = get('pile');
+const totalScore = (scores) => scores.reduce((acc, s) => acc + (s?.points ?? 0), 0);
 
-    clear(pile);
-
+function renderScore(scores) {
     const score = create('div.score');
-    const scores = calcScores();
 
     const lines = scores
         .filter((s) => s !== null)
-        .map((s) => s === null ? '<p>nothing: 000</p>' : `<p>${s.name}: ${String(s.points).padStart(3, '0')}</p>`);
-
-    lines.push(`<p>Total: ${String(scores.reduce((acc, s) => acc + (s?.points ?? 0), 0)).padStart(3, '0')}</p>`);
+        .map((s) => `<span>${s.name}: ${s.points}</span>`);
 
     score.innerHTML = lines.join('');
 
-    pile.append(score);
+    return score;
+}
+
+const emojiHand = ({ name, suit }) => {
+    switch (name) {
+        case 'Royal Flush': return '👑';
+        case 'Straight Flush': return '🍍';
+        case 'Four of a Kind': return '4️⃣';
+        case 'Full House': return '🏠';
+        case 'Flush': return suit;
+        case 'Straight': return '🔢';
+        case 'Three of a Kind': return '3️⃣';
+        case 'Two Pairs': return '👯';
+        case 'One Pair': return '🍐';
+        default:
+            console.log(name);
+            return '';
+    }
+}
+
+function generateShare(scores) {
+    const share = [
+        'Poker Squares by @emh',
+        scores.filter((s) => s !== null).map(emojiHand).join(''),
+        `Score: ${totalScore(scores)}`,
+        'https://emh.io/pokersquares'
+    ];
+
+    return {
+        title: 'Poker Squares',
+        text: share.join('\n')
+    };
+}
+
+function handleCopy(data) {
+    navigator.clipboard.writeText(data.text);
+}
+
+function handleShare(data) {
+    if (navigator.canShare && navigator.canShare(data)) {
+        navigator.share(data);
+    } else {
+        handleCopy(data);
+    }
+}
+
+function renderShareDialog() {
+    const scores = calcScores();
+    const shareData = generateShare(scores);
+
+    const app = get('app');
+    const dialog = create('dialog');
+
+    const div = create('div');
+    const scoreDiv = renderScore(scores);
+    const message = create('p');
+
+    message.innerHTML = `You're finished! You scored ${totalScore(scores)}. Here are the hands you made.`;
+
+    const buttonDiv = create('div.buttons');
+
+    buttonDiv.append(
+        button('Share', () => handleShare(shareData)),
+        button('Copy', (e) => {
+            e.target.innerHTML = 'Copied!';
+            handleCopy(shareData);
+            setTimeout(() => e.target.innerHTML = 'Copy', 1000);
+        }),
+        button('OK', () => dialog.remove())
+    );
+
+    div.append(
+        message,
+        scoreDiv,
+        buttonDiv
+    );
+
+    dialog.append(div);
+
+    app.append(dialog);
+    dialog.showModal();
 }
 
 function render() {
@@ -248,7 +323,7 @@ function render() {
     if (state.pile.length > 0 || state.dealtCard) {
         renderPile();
     } else {
-        renderScore();
+        renderShareDialog();
     }
 }
 

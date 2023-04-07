@@ -15,3 +15,12 @@ export const create = (s) => {
 };
 export const get = (id) => document.getElementById(id);
 export const clear = (el) => el.innerHTML = '';
+
+export const button = (label, handler) => {
+    const button = create('button');
+
+    button.innerHTML = label;
+    button.addEventListener('click', handler);
+
+    return button;
+};
