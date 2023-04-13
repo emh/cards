@@ -5,5 +5,5 @@ export const div = (n, d) => ({ q: Math.floor(n / d), r: n % d });
 export const key = () => {
     const d = new Date(); // local time
 
-    return `${d.getFullYear() + 1}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
