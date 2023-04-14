@@ -22,7 +22,7 @@ export const straight = (hand) => {
     const sorted = sort(hand);
 
     for (let i = 1; i < sorted.length; i++) {
-        if (sorted[i].value - sorted[i - 1].value > 1) return false;
+        if (sorted[i].value - sorted[i - 1].value !== 1) return false;
     }
 
     return true;
