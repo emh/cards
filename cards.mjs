@@ -18,7 +18,18 @@ export const sort = (hand) => [...hand].sort((c1, c2) => c1.value - c2.value);
 
 export const aKind = (cards) => cards.every((card) => card.value === cards[0].value);
 export const flush = (hand) => hand.every((card) => card.suit === hand[0].suit);
+export const royalStraight = (hand) => {
+    const sorted = sort(hand);
+
+    return (sorted[0].value === ACE &&
+        sorted[1].value === 10 &&
+        sorted[2].value === JACK &&
+        sorted[3].value === QUEEN &&
+        sorted[4].value === KING);
+};
 export const straight = (hand) => {
+    if (royalStraight(hand)) return true;
+
     const sorted = sort(hand);
 
     for (let i = 1; i < sorted.length; i++) {
@@ -26,15 +37,11 @@ export const straight = (hand) => {
     }
 
     return true;
-}
+};
 export const royalFlush = (hand) => {
     if (!flush(hand)) return false;
 
-    const sorted = sort(hand);
-
-    if (sorted[0].value === ACE && sorted[4].value === KING && sorted[4].value - sorted[1].value === 3) return true;
-
-    return false;
+    return royalStraight(hand);
 };
 export const fourOfAKind = (hand) => {
     const sorted = sort(hand);
