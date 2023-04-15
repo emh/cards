@@ -7,7 +7,7 @@ import { getHistory, putHistory } from '../lib/history.mjs';
 const GAME = 'double-deal';
 
 const seed = Date.parse(key());
-const random = prng(seed);
+const random = prng(Date.now());
 
 const randInt = (n) => Math.floor(n * random());
 
