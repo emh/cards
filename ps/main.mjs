@@ -1,8 +1,8 @@
-import { create, get, clear, button } from './html.mjs';
-import { shuffle, key } from './utils.mjs';
-import { deck, SPADES, CLUBS, HEARTS, DIAMONDS, royalFlush, straight, flush, fourOfAKind, fullHouse, threeOfAKind, twoPairs, onePair, ACE, JACK, QUEEN, KING } from './cards.mjs';
-import { prng } from './prng.mjs';
-import { getHistory, putHistory } from './history.mjs';
+import { create, get, clear, button } from '../lib/html.mjs';
+import { shuffle, key } from '../lib/utils.mjs';
+import { deck, suitClasses, cardValue, royalFlush, straight, flush, fourOfAKind, fullHouse, threeOfAKind, twoPairs, onePair, ACE, JACK, QUEEN, KING } from '../lib/cards.mjs';
+import { prng } from '../lib/prng.mjs';
+import { getHistory, putHistory } from '../lib/history.mjs';
 
 const GAME = 'poker-squares';
 
@@ -40,7 +40,6 @@ function initialize() {
     if (savedGame) return savedGame;
 
     return {
-        key: key(),
         board: [
             [null, null, null, null, null],
             [null, null, null, null, null],
@@ -55,23 +54,6 @@ function initialize() {
 };
 
 const state = initialize();
-
-const suitClasses = {
-    [SPADES]: 'spades',
-    [CLUBS]: 'clubs',
-    [HEARTS]: 'hearts',
-    [DIAMONDS]: 'diamonds'
-};
-
-const cardValue = (v) => {
-    switch (v) {
-        case ACE: return 'A';
-        case JACK: return 'J';
-        case QUEEN: return 'Q';
-        case KING: return 'K';
-        default: return v;
-    }
-}
 
 function dealCard() {
     state.dealtCard = state.pile[0];

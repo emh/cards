@@ -2,7 +2,7 @@ body, html, #app {
     padding: 0;
     margin: 0;
     height: 100%;
-    font-family: Arial, Helvetica, sans-serif
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 #app {
@@ -21,25 +21,32 @@ body, html, #app {
 
 #board {
     display: flex;
-    flex-direction: column;
-    gap: 5px;
     flex: 1;
     align-items: center;
     justify-content: center;
 }
 
-#board .row {
+#left-hand, #right-hand {
     display: flex;
     gap: 5px;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    height: 100px;
 }
 
-#pile {
+#discards, #piles {
     display: flex;
-    flex-direction: column;
     flex: 1;
     justify-content: center;
     align-items: center;
-    gap: 16px;
+}
+
+#left-discard, #right-discard, #left-pile, #right-pile {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
 }
 
 .card, .slot, .deck {
@@ -47,6 +54,7 @@ body, html, #app {
     height: 50px;
     border-radius: 5px;
     cursor: pointer;
+    box-sizing: border-box;
 }
 
 .card {
@@ -55,6 +63,10 @@ body, html, #app {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.discard {
+    align-self: flex-end;
 }
 
 .slot {
