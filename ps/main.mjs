@@ -239,7 +239,7 @@ function generateShare(scores) {
         key(),
         scores.filter((s) => s !== null).map(emojiHand).join(''),
         `Score: ${totalScore(scores)}`,
-        'https://emh.io/pokersquares'
+        'https://emh.io/cards/ps'
     ];
 
     return {
