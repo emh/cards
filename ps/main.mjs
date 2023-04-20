@@ -1,13 +1,18 @@
 import { create, get, clear, button } from '../lib/html.mjs';
-import { shuffle, key } from '../lib/utils.mjs';
+import { shuffle, key, div } from '../lib/utils.mjs';
 import { deck, suitClasses, cardValue, royalFlush, straight, flush, fourOfAKind, fullHouse, threeOfAKind, twoPairs, onePair, ACE, JACK, QUEEN, KING } from '../lib/cards.mjs';
 import { prng } from '../lib/prng.mjs';
 import { getHistory, putHistory } from '../lib/history.mjs';
 
 const GAME = 'poker-squares';
 
-const seed = Date.parse(key());
-const random = prng(seed);
+function goal(name) {
+    try {
+        clicky.goal(`[${GAME}] ${name}`);
+    } catch (e) {
+        console.error('Error logging goal', name, e);
+    }
+}
 
 function loadGame() {
     const history = getHistory(GAME);
@@ -29,38 +34,40 @@ function getAutoDeal() {
 
     const lastKey = keys.sort().pop();
 
-    console.log(lastKey);
-
     return lastKey ? history[lastKey].autoDeal : false;
 }
 
-function initialize() {
-    const savedGame = loadGame();
+function initialize(practice = false) {
+    const seed = Date.parse(key());
+    const random = practice ? Math.random : prng(seed);
 
-    if (savedGame) return savedGame;
+    let state = practice ? null : loadGame();
 
-    return {
-        board: [
-            [null, null, null, null, null],
-            [null, null, null, null, null],
-            [null, null, null, null, null],
-            [null, null, null, null, null],
-            [null, null, null, null, null]
-        ],
-        pile: shuffle(deck, random).slice(0, 25),
-        topCardVisible: false,
-        autoDeal: getAutoDeal()
-    };
-};
+    if (!state) {
+        state = {
+            board: [
+                [null, null, null, null, null],
+                [null, null, null, null, null],
+                [null, null, null, null, null],
+                [null, null, null, null, null],
+                [null, null, null, null, null]
+            ],
+            pile: shuffle(deck, random).slice(0, 25),
+            topCardVisible: false,
+            autoDeal: getAutoDeal(),
+            practice
+        };
+    }
 
-const state = initialize();
+    return state;
+}
 
-function dealCard() {
+function dealCard(state) {
     state.dealtCard = state.pile[0];
     state.pile.shift();
 }
 
-function renderBoard() {
+function renderBoard(state) {
     const board = get('board');
 
     clear(board);
@@ -87,7 +94,7 @@ function renderBoard() {
                         state.board[i][j] = state.dealtCard;
 
                         if (state.autoDeal) {
-                            dealCard();
+                            dealCard(state);
                         } else {
                             state.placement = { i, j };
                             state.topCardVisible = false;
@@ -95,7 +102,7 @@ function renderBoard() {
 
                         if (!state.autoDeal && state.pile.length === 0) state.dealtCard = null;
 
-                        render();
+                        render(state);
                     });
                 }
             }
@@ -107,7 +114,7 @@ function renderBoard() {
     }
 }
 
-function renderAutoDeal() {
+function renderAutoDeal(state) {
     const div = create('div.autodeal');
 
     const checkbox = create('input#autodeal');
@@ -115,7 +122,10 @@ function renderAutoDeal() {
     if (state.autoDeal) checkbox.setAttribute('checked', true);
     checkbox.addEventListener('change', () => {
         state.autoDeal = !state.autoDeal;
-        render();
+        if (!state.placement && !state.topCardVisible) dealCard(state);
+        state.topCardVisible = true;
+        state.placement = null;
+        render(state);
     });
     const label = create('label');
     label.setAttribute('for', 'autodeal');
@@ -126,7 +136,7 @@ function renderAutoDeal() {
     return div;
 }
 
-function renderPile() {
+function renderPile(state) {
     const pile = get('pile');
 
     clear(pile);
@@ -139,13 +149,13 @@ function renderPile() {
     } else {
         deck.addEventListener('click', () => {
             state.topCardVisible = true;
-            dealCard();
+            dealCard(state);
             state.placement = null;
-            render();
+            render(state);
         });
     }
 
-    pile.append(deck, renderAutoDeal());
+    pile.append(deck, renderAutoDeal(state));
 }
 
 function calcScore(hand) {
@@ -188,7 +198,7 @@ function calcScore(hand) {
     return null;
 }
 
-function calcScores() {
+function calcScores(state) {
     const hands = [];
 
     for (let i = 0; i < 5; i++) {
@@ -260,8 +270,8 @@ function handleShare(data) {
     }
 }
 
-function renderShareDialog() {
-    const scores = calcScores();
+function renderShareDialog(state) {
+    const scores = calcScores(state);
     const shareData = generateShare(scores);
 
     const app = get('app');
@@ -275,15 +285,33 @@ function renderShareDialog() {
 
     const buttonDiv = create('div.buttons');
 
-    buttonDiv.append(
-        button('Share', () => handleShare(shareData)),
-        button('Copy', (e) => {
-            e.target.innerHTML = 'Copied!';
-            handleCopy(shareData);
-            setTimeout(() => e.target.innerHTML = 'Copy', 1000);
-        }),
-        button('OK', () => dialog.remove())
-    );
+    if (state.practice) {
+        buttonDiv.append(
+            button('Play', () => {
+                play(false);
+                dialog.remove();
+            }),
+            button('Practice', () => {
+                play(true);
+                dialog.remove();
+            })
+        );
+    } else {
+        buttonDiv.append(
+            button('Share', () => handleShare(shareData)),
+            button('Copy', (e) => {
+                goal('Shared');
+                e.target.innerHTML = 'Copied!';
+                handleCopy(shareData);
+                setTimeout(() => e.target.innerHTML = 'Copy', 1000);
+            }),
+            button('Practice', () => {
+                play(true);
+                dialog.remove();
+            }),
+            button('OK', () => dialog.remove())
+        );
+    }
 
     div.append(
         message,
@@ -297,20 +325,66 @@ function renderShareDialog() {
     dialog.showModal();
 }
 
-function render() {
-    saveGame(state);
-    renderBoard();
-
+function render(state) {
     console.log(state);
 
+    if (!state.practice) saveGame(state);
+
+    renderBoard(state);
+
     if (state.pile.length > 0 || state.dealtCard) {
-        renderPile();
+        renderPile(state);
     } else {
-        renderShareDialog();
+        renderShareDialog(state);
     }
 }
 
-render();
+function play(practice) {
+    if (practice) goal('Practice');
+    const state = initialize(practice);
+
+    if (state.autoDeal && !state.topCardVisible) {
+        state.topCardVisible = true;
+        dealCard(state);
+    }
+
+    render(state);
+}
+
+function renderWelcomeDialog() {
+    const app = get('app');
+    const dialog = create('dialog');
+
+    const div = create('div');
+    const message = create('p');
+
+    message.innerHTML = `Welcome to poker squares. You'll be dealt 25 cards. Arrange them in a 5x5 grid such that you make the best poker hands you can in all 5 rows AND all 5 columns.`;
+
+    const buttonDiv = create('div.buttons');
+
+    buttonDiv.append(
+        button('Play', () => {
+            play(false);
+            dialog.remove();
+        }),
+        button('Practice', () => {
+            play(true);
+            dialog.remove();
+        })
+    );
+
+    div.append(
+        message,
+        buttonDiv
+    );
+
+    dialog.append(div);
+
+    app.append(dialog);
+    dialog.showModal();
+}
+
+renderWelcomeDialog();
 
 // const autoPlay = () => {
 //     const n = 25 - state.pile.length;
@@ -319,9 +393,9 @@ render();
 //     state.board[i][j] = state.pile[0];
 //     state.pile.shift();
 
-//     render();
+//     render(state);
 
-//     if (n < 22) {
+//     if (n < 24) {
 //         setTimeout(autoPlay, 250);
 //     }
 // }
