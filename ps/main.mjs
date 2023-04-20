@@ -122,7 +122,7 @@ function renderAutoDeal(state) {
     if (state.autoDeal) checkbox.setAttribute('checked', true);
     checkbox.addEventListener('change', () => {
         state.autoDeal = !state.autoDeal;
-        if (!state.placement && !state.topCardVisible) dealCard(state);
+        if (!state.topCardVisible) dealCard(state);
         state.topCardVisible = true;
         state.placement = null;
         render(state);
